@@ -1,0 +1,11 @@
+syntax = "proto3";
+package payment;
+option go_package = "event_sourcing_gateway/proto/payment;payment";
+
+import "payment/balance.proto";
+
+// /api/v1/payment-service
+service PaymentService {
+  // GET, /balance
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse);
+}

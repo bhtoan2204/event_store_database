@@ -1,0 +1,54 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "REST -\u003e GRPC API Gateway",
+        "title": "API Gateway",
+        "contact": {},
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/api/v1/payment-service/balance": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PaymentService"
+                ],
+                "summary": "permission:",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": " ",
+                        "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/event_sourcing_gateway_proto_payment.GetBalanceResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "event_sourcing_gateway_proto_payment.GetBalanceResponse": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

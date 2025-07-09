@@ -1,0 +1,11 @@
+syntax = "proto3";
+package payment;
+option go_package = "event_sourcing_gateway/proto/payment;payment";
+
+message GetBalanceRequest {
+  int64 id = 1;
+}
+
+message GetBalanceResponse {
+  int64 balance = 1;
+}

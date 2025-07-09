@@ -1,0 +1,35 @@
+basePath: /
+definitions:
+  event_sourcing_gateway_proto_payment.GetBalanceResponse:
+    properties:
+      balance:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: REST -> GRPC API Gateway
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: API Gateway
+  version: "1.0"
+paths:
+  /api/v1/payment-service/balance:
+    get:
+      parameters:
+      - description: ' '
+        in: query
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event_sourcing_gateway_proto_payment.GetBalanceResponse'
+      summary: 'permission:'
+      tags:
+      - PaymentService
+swagger: "2.0"
