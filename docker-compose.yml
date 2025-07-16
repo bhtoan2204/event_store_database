@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  esdb:
+    image: eventstore/eventstore:latest
+    environment:
+      - EVENTSTORE_INSECURE=true
+      - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
+      - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
+      - EVENTSTORE_RUN_PROJECTIONS=All
+    ports:
+      - "2113:2113"   # HTTP API (browser, REST)
+      - "1113:1113"   # TCP client (for gRPC)
+    volumes:
+      - esdb-data:/var/lib/eventstore
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  esdb-data:
