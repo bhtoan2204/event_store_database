@@ -6,6 +6,13 @@ type User struct {
 	password string `gorm:"size:255;not null"`
 }
 
+func NewUser(email string, password string) *User {
+	return &User{
+		email:    email,
+		password: password,
+	}
+}
+
 func (u *User) TableName() string {
 	return "users"
 }

@@ -1,71 +1,58 @@
 package persistent
 
-// func InitDB() error {
-// 	baseDSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=%s&parseTime=%t&loc=%s",
-// 		global.Config.MySQLConfig.User,
-// 		global.Config.MySQLConfig.Pass,
-// 		global.Config.MySQLConfig.Host,
-// 		strconv.Itoa(global.Config.MySQLConfig.Port),
-// 		global.Config.MySQLConfig.Charset,
-// 		global.Config.MySQLConfig.ParseTime,
-// 		global.Config.MySQLConfig.Loc,
-// 	)
+import (
+	"event_sourcing_user/constant"
+	"fmt"
+	"log"
+	"time"
 
-// 	baseDB, err := gorm.Open(mysql.Open(baseDSN), &gorm.Config{})
-// 	if err != nil {
-// 		global.Logger.Error("Failed to connect to MySQL", zap.Error(err))
-// 		panic(err)
-// 	}
+	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
 
-// 	dbName := global.Config.MySQLConfig.Name
-// 	createDBSQL := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET %s", dbName, global.Config.MySQLConfig.Charset)
-// 	if err := baseDB.Exec(createDBSQL).Error; err != nil {
-// 		global.Logger.Error("Failed to create database", zap.Error(err))
-// 		panic(err)
-// 	}
+type PersistentConnection struct {
+	db *gorm.DB
+}
 
-// 	sqlDB, _ := baseDB.DB()
-// 	sqlDB.Close()
+func NewPersistentConnection(cfg *constant.PostgresConfig) *PersistentConnection {
+	if cfg == nil {
+		log.Fatal("PostgresConfig is nil")
+	}
 
-// 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=%t&loc=%s",
-// 		global.Config.MySQLConfig.User,
-// 		global.Config.MySQLConfig.Pass,
-// 		global.Config.MySQLConfig.Host,
-// 		strconv.Itoa(global.Config.MySQLConfig.Port),
-// 		dbName,
-// 		global.Config.MySQLConfig.Charset,
-// 		global.Config.MySQLConfig.ParseTime,
-// 		global.Config.MySQLConfig.Loc,
-// 	)
+	dsn := fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		cfg.Host, cfg.Port, cfg.Username, cfg.Password, cfg.Database,
+	)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("failed to connect to Postgres: %v", err)
+	}
 
-// 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-// 	if err != nil {
-// 		global.Logger.Error("Failed to connect to MySQL", zap.Error(err))
-// 		panic(err)
-// 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatalf("failed to get sql.DB from gorm DB: %v", err)
+	}
 
-// 	if err := db.Use(otelgorm.NewPlugin()); err != nil {
-// 		log.Fatalf("Failed to use otelgorm plugin: %v", err)
-// 	}
+	sqlDB.SetMaxIdleConns(cfg.MaxIdleConns)
+	sqlDB.SetMaxOpenConns(cfg.MaxOpenConns)
+	sqlDB.SetConnMaxLifetime(time.Duration(cfg.MaxLifetime) * time.Second)
 
-// 	global.MDB = db
-// 	setPool()
-// 	migrateTables()
+	if err := db.Use(otelgorm.NewPlugin()); err != nil {
+		log.Fatalf("failed to use otelgorm plugin: %v", err)
+	}
 
-// 	return nil
-// }
+	log.Println("Successfully connected to Postgres database")
 
-// func CloseDB() {
-// 	if global.MDB != nil {
-// 		sqlDB, err := global.MDB.DB()
-// 		if err != nil {
-// 			global.Logger.Error("Failed to get database connection", zap.Error(err))
-// 			return
-// 		}
-// 		if err := sqlDB.Close(); err != nil {
-// 			global.Logger.Error("Failed to close database connection", zap.Error(err))
-// 		} else {
-// 			global.Logger.Info("Database connection closed")
-// 		}
-// 	}
-// }
+	return &PersistentConnection{
+		db: db,
+	}
+}
+
+func (p *PersistentConnection) SyncTable(models ...interface{}) error {
+	return p.db.AutoMigrate(models...)
+}
+
+func (p *PersistentConnection) GetDB() *gorm.DB {
+	return p.db
+}

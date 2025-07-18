@@ -2,8 +2,7 @@ package repository
 
 import (
 	"context"
-
-	"gorm.io/gorm"
+	"event_sourcing_user/infrastructure/persistent"
 )
 
 type IRepositoryFactory interface {
@@ -12,18 +11,18 @@ type IRepositoryFactory interface {
 }
 
 type repositoryFactory struct {
-	db             *gorm.DB
-	userRepository IUserRepository
+	persistentConnection *persistent.PersistentConnection
+	userRepository       IUserRepository
 }
 
-func NewRepositoryFactory(db *gorm.DB) IRepositoryFactory {
-	userRepository := NewUserRepository(db)
-	return &repositoryFactory{db: db, userRepository: userRepository}
+func NewRepositoryFactory(persistentConnection *persistent.PersistentConnection) IRepositoryFactory {
+	userRepository := NewUserRepository(persistentConnection.GetDB())
+	return &repositoryFactory{persistentConnection: persistentConnection, userRepository: userRepository}
 }
 
 func (r *repositoryFactory) WithTransaction(ctx context.Context, fn func(IRepositoryFactory) error) (err error) {
-	tx := r.db.Begin()
-	tr := NewRepositoryFactory(tx)
+	tx := r.persistentConnection.GetDB().Begin()
+	tr := NewRepositoryFactory(r.persistentConnection)
 
 	err = tx.Error
 	if err != nil {
