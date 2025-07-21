@@ -3,14 +3,14 @@ version: '3.8'
 services:
   esdb:
     image: eventstore/eventstore:latest
+    container_name: esdb
     environment:
       - EVENTSTORE_INSECURE=true
-      - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
       - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
       - EVENTSTORE_RUN_PROJECTIONS=All
     ports:
-      - "2113:2113"   # HTTP API (browser, REST)
-      - "1113:1113"   # TCP client (for gRPC)
+      - "2113:2113"
+      - "1113:1113"
     volumes:
       - esdb-data:/var/lib/eventstore
     restart: unless-stopped
@@ -27,6 +27,15 @@ services:
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     restart: unless-stopped
 
+  consul:
+    image: hashicorp/consul:latest
+    command: agent -dev -client=0.0.0.0
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    volumes:
+      - ./config:/consul/config
+      
 volumes:
   postgres_data:
   esdb-data:

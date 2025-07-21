@@ -27,9 +27,6 @@ func bindEnv(v *viper.Viper) {
 	// Server mappings
 	v.BindEnv("server.server_mode", "SERVER_MODE")
 	v.BindEnv("server.server_gin_mode", "SERVER_GIN_MODE")
-	v.BindEnv("server.grpc_port", "SERVER_GRPC_PORT")
-	v.BindEnv("server.http_port", "SERVER_HTTP_PORT")
-	v.BindEnv("server.metrics_port", "SERVER_METRICS_PORT")
 
 	// Security mappings
 	v.BindEnv("security.jwt_access_secret", "SECURITY_JWT_ACCESS_SECRET")
@@ -46,4 +43,10 @@ func bindEnv(v *viper.Viper) {
 	v.BindEnv("postgres.max_idle_conns", "POSTGRES_MAX_IDLE_CONNS")
 	v.BindEnv("postgres.max_open_conns", "POSTGRES_MAX_OPEN_CONNS")
 	v.BindEnv("postgres.max_lifetime", "POSTGRES_MAX_LIFETIME")
+
+	// Consul mappings
+	v.BindEnv("consul.address", "CONSUL_ADDRESS")
+	v.BindEnv("consul.scheme", "CONSUL_SCHEME")
+	v.BindEnv("consul.data_center", "CONSUL_DATA_CENTER")
+	v.BindEnv("consul.token", "CONSUL_TOKEN")
 }

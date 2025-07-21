@@ -4,7 +4,6 @@ import (
 	"event_sourcing_user/config"
 	"event_sourcing_user/infrastructure/persistent"
 	"event_sourcing_user/infrastructure/persistent/persistent_object"
-	"event_sourcing_user/infrastructure/persistent/repository"
 
 	"github.com/joho/godotenv"
 )
@@ -23,9 +22,9 @@ func run() {
 	persistentConnection := persistent.NewPersistentConnection(&cfg.Postgres)
 	persistentConnection.SyncTable(&persistent_object.User{})
 
-	repositoryFactory := repository.NewRepositoryFactory(persistentConnection)
-	if err != nil {
-		panic(err)
-	}
+	// repositoryFactory := repository.NewRepositoryFactory(persistentConnection)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 }
