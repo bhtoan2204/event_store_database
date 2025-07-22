@@ -8,7 +8,7 @@ import (
 	"event_sourcing_user/infrastructure/srvdisc"
 	"event_sourcing_user/package/grpc_infra"
 	"event_sourcing_user/package/server"
-	grpc_presentation "event_sourcing_user/presentation/grpc"
+	"event_sourcing_user/presentation/grpc_layer"
 	"event_sourcing_user/proto/user"
 	"log"
 
@@ -57,7 +57,7 @@ func (a *app) Start(ctx context.Context) error {
 	healthCheck := grpc_infra.NewHealthService()
 	grpc_health_v1.RegisterHealthServer(rpcServer, healthCheck)
 
-	userService := grpc_presentation.NewGrpcPresentation(rpcServer, a.repositoryFactory)
+	userService := grpc_layer.NewGrpcPresentation(rpcServer, a.repositoryFactory)
 	user.RegisterUserServiceServer(rpcServer, userService)
 
 	grpcServer, err := server.New()

@@ -1,4 +1,4 @@
-package grpc_presentation
+package grpc_layer
 
 import (
 	"event_sourcing_user/infrastructure/persistent/repository"
