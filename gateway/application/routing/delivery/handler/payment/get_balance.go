@@ -21,12 +21,12 @@ func NewGetBalanceHandler(cfg *settings.Config) *getBalanceHandler {
     return &getBalanceHandler{}
 }
 
-//	@Summary	permission: 
-//	@Tags		PaymentService
-//	@Produce	json
-//	@Param		id	query		int64	false	" "
-//	@Success	200	{object}	payment.GetBalanceResponse
-//	@Router		/api/v1/payment-service/balance [get]
+// @Summary permission: 
+// @Tags PaymentService
+// @Produce json
+// @Param id  query  int64 false " "
+// @Success 200 {object} payment.GetBalanceResponse
+// @Router /api/v1/payment-service/balance [get]
 func (handler *getBalanceHandler) Handle(ctx *wrapper.Context) (interface{}, error) {
     monitor.SetApmContext(apm.DetachedContext(ctx.Request.Context()))
     data := &payment.GetBalanceRequest{}

@@ -15,7 +15,7 @@ type PersistentConnection struct {
 	db *gorm.DB
 }
 
-func NewPersistentConnection(cfg *constant.PostgresConfig) *PersistentConnection {
+func NewPersistentConnection(cfg *constant.PostgresConfig) (*PersistentConnection, error) {
 	if cfg == nil {
 		log.Fatal("PostgresConfig is nil")
 	}
@@ -46,7 +46,7 @@ func NewPersistentConnection(cfg *constant.PostgresConfig) *PersistentConnection
 
 	return &PersistentConnection{
 		db: db,
-	}
+	}, nil
 }
 
 func (p *PersistentConnection) SyncTable(models ...interface{}) error {

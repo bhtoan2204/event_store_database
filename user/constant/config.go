@@ -3,6 +3,7 @@ package constant
 type ServerConfig struct {
 	ServerMode    string `mapstructure:"server_mode"`
 	ServerGinMode string `mapstructure:"server_gin_mode"`
+	ServiceName   string `mapstructure:"service_name"`
 	// GRPCPort      int    `mapstructure:"grpc_port"`
 	// HTTPPort      int    `mapstructure:"http_port"`
 	// MetricsPort   int    `mapstructure:"metrics_port"`

@@ -13,7 +13,8 @@ protos:
 	  --proto_path=$(PROTO_DIR) \
 	  --go_out=paths=source_relative:$(PROTO_DIR) \
 	  --go-grpc_out=require_unimplemented_servers=false,paths=source_relative:$(PROTO_DIR) \
-	  $(PROTO_DIR)/payment/*.proto
+	  $(PROTO_DIR)/payment/*.proto \
+	  $(PROTO_DIR)/user/*.proto
 	@$(GOIMPORTS) -w $(PROTO_DIR)
 .PHONY: protos
 

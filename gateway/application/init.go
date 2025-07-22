@@ -9,3 +9,12 @@ func (s *Server) initPaymentRouting() {
 	rPaymentPayment.Use(h.Authorization())
 	h.RegisterAPI(rPaymentPayment)
 }
+
+func (s *Server) initUserRouting() {
+	h := s.handler
+	router := s.router.Group("")
+
+	rUserUser := router.Group("/api/v1/user-service")
+	rUserUser.Use(h.Authorization())
+	h.RegisterAPIUserService(rUserUser)
+}

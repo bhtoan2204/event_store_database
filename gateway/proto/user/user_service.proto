@@ -1,0 +1,18 @@
+syntax = "proto3";
+package user;
+option go_package = "event_sourcing_gateway/proto/user;user";
+
+import "user/user.proto";
+import "user/auth.proto";
+
+// /api/v1/user-service
+service UserService {
+  // POST, /user/create
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+
+  // POST, /auth/login
+  rpc Login(LoginRequest) returns (LoginResponse);
+
+  // POST, /auth/refresh
+  rpc Refresh(RefreshTokenRequest) returns (RefreshTokenResponse);
+}

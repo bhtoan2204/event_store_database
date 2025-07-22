@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 
@@ -95,10 +94,8 @@ func (s *Server) Routes(ctx context.Context) http.Handler {
 		s.cfg,
 		usecase.NewRoutingUseCase(service.NewServiceClient(s.cfg)))
 
-	fmt.Println(s.handler)
-
 	// v1 api
-	// s.initUserRouting()
+	s.initUserRouting()
 	s.initPaymentRouting()
 
 	return r

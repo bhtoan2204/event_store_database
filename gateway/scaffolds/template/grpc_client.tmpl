@@ -11,7 +11,9 @@ import(
 	
     "event_sourcing_gateway/package/grpc"
     "event_sourcing_gateway/package/monitor"
-    //"context"
+    "event_sourcing_gateway/package/svcdisc"
+    "github.com/hashicorp/consul/api"
+    "context"
 )
 
 func (client *<service_name_lower_1st>Client) initMethodRegistry() {
@@ -23,10 +25,17 @@ func (client *<service_name_lower_1st>Client) initMethodRegistry() {
 type <service_name_lower_1st>Client struct {
     grpcClient <proto_package>.<service_name>Client
     methodRegistry map[string]func(interface{}, map[string]string) (interface{}, error)
+    svcdisc *api.AgentService
 }
 
 func New<service_name>Client(config *settings.Config) *<service_name_lower_1st>Client {
     // using WithInsecure() because no SSL running
+    consul := svcdisc.NewConsul(config)
+    service, err := consul.GetService(context.Background(), config.Service.<config_name>)
+    if err != nil {
+        fmt.Println("Could not get service:", err)
+    }
+
     cc, err := grpc.CreateGRPCClientConn(config.Service.<config_name>, false)
     if err != nil {
         fmt.Println("Could not connect:", err)
@@ -34,6 +43,7 @@ func New<service_name>Client(config *settings.Config) *<service_name_lower_1st>C
 
     client := <service_name_lower_1st>Client{
         grpcClient: <proto_package>.New<service_name>Client(cc),
+        svcdisc: service,
     }
     client.initMethodRegistry()
 

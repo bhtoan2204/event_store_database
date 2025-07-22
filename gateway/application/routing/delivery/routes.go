@@ -8,3 +8,9 @@ import (
 func (h *RoutingHandler) RegisterAPI(routes *gin.RouterGroup) {
 	routes.GET("/balance", h.handle())
 }
+
+func (h *RoutingHandler) RegisterAPIUserService(routes *gin.RouterGroup) {
+	routes.POST("/user/create", h.handle())
+	routes.POST("/auth/login", h.handle())
+	routes.POST("/auth/refresh", h.handle())
+}

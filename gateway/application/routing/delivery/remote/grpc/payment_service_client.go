@@ -9,9 +9,11 @@ import (
 	"event_sourcing_gateway/package/settings"
 	"event_sourcing_gateway/proto/payment"
 
+	"context"
 	"event_sourcing_gateway/package/grpc"
 	"event_sourcing_gateway/package/monitor"
-	//"context"
+	"event_sourcing_gateway/package/svcdisc"
+	"github.com/hashicorp/consul/api"
 )
 
 func (client *paymentServiceClient) initMethodRegistry() {
@@ -23,17 +25,25 @@ func (client *paymentServiceClient) initMethodRegistry() {
 type paymentServiceClient struct {
 	grpcClient     payment.PaymentServiceClient
 	methodRegistry map[string]func(interface{}, map[string]string) (interface{}, error)
+	svcdisc        *api.AgentService
 }
 
 func NewPaymentServiceClient(config *settings.Config) *paymentServiceClient {
 	// using WithInsecure() because no SSL running
-	cc, err := grpc.CreateGRPCClientConn(config.Service.PaymentServiceUrl, false)
+	consul := svcdisc.NewConsul(config)
+	service, err := consul.GetService(context.Background(), config.Service.PaymentServiceName)
+	if err != nil {
+		fmt.Println("Could not get service:", err)
+	}
+
+	cc, err := grpc.CreateGRPCClientConn(config.Service.PaymentServiceName, false)
 	if err != nil {
 		fmt.Println("Could not connect:", err)
 	}
 
 	client := paymentServiceClient{
 		grpcClient: payment.NewPaymentServiceClient(cc),
+		svcdisc:    service,
 	}
 	client.initMethodRegistry()
 

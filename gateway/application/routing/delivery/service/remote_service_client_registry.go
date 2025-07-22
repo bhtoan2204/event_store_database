@@ -10,5 +10,6 @@ import(
 func initRemoteServiceClientRegistry(config *settings.Config) map[string]RemoteServiceClient {
     return map[string]RemoteServiceClient {
         "PaymentService": remote.NewGrpcServiceClient(grpc.NewPaymentServiceClient(config)),
+        "UserService": remote.NewGrpcServiceClient(grpc.NewUserServiceClient(config)),
     }
 }

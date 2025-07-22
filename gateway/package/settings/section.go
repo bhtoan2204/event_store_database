@@ -5,17 +5,6 @@ type ServerConfig struct {
 	Mode string `mapstructure:"mode"`
 }
 
-type MySQLConfig struct {
-	User         string `mapstructure:"user"`
-	Pass         string `mapstructure:"pass"`
-	Host         string `mapstructure:"host"`
-	Port         int    `mapstructure:"port"`
-	Name         string `mapstructure:"name"`
-	MaxIdleConns int    `mapstructure:"max_idle_conns"`
-	MaxOpenConns int    `mapstructure:"max_open_conns"`
-	MaxLifetime  int    `mapstructure:"max_lifetime"`
-}
-
 type SecurityConfig struct {
 	JWTAccessSecret      string `mapstructure:"jwt_access_secret"`
 	JWTRefreshSecret     string `mapstructure:"jwt_refresh_secret"`
@@ -33,20 +22,6 @@ type LogConfig struct {
 	Compress   bool   `mapstructure:"compress"`
 }
 
-type RedisConfig struct {
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	Password string `mapstructure:"password"`
-	Database int    `mapstructure:"database"`
-}
-
-type S3Config struct {
-	AccessKeyID     string `mapstructure:"access_key_id"`
-	SecretAccessKey string `mapstructure:"secret_access_key"`
-	Region          string `mapstructure:"region"`
-	Bucket          string `mapstructure:"bucket"`
-}
-
 type ConsulConfig struct {
 	Address    string `mapstructure:"address"`
 	Scheme     string `mapstructure:"scheme"`
@@ -54,30 +29,20 @@ type ConsulConfig struct {
 	Token      string `mapstructure:"token"`
 }
 
-type KafkaConfig struct {
-	Broker  string `mapstructure:"broker"`
-	Port    int    `mapstructure:"port"`
-	Topic   string `mapstructure:"topic"`
-	GroupID string `mapstructure:"group_id"`
-}
-
 type JaegerConfig struct {
 	Endpoint string `mapstructure:"endpoint"`
 }
 
 type Service struct {
-	PaymentServiceUrl string `mapstructure:"payment_service_url"`
+	PaymentServiceName string `mapstructure:"payment_service_name"`
+	UserServiceName    string `mapstructure:"user_service_name"`
 }
 
 type Config struct {
 	Server         ServerConfig   `mapstructure:"server"`
-	MySQLConfig    MySQLConfig    `mapstructure:"mysql"`
 	LogConfig      LogConfig      `mapstructure:"log"`
 	SecurityConfig SecurityConfig `mapstructure:"security"`
-	RedisConfig    RedisConfig    `mapstructure:"redis"`
-	S3Config       S3Config       `mapstructure:"s3"`
 	ConsulConfig   ConsulConfig   `mapstructure:"consul"`
-	KafkaConfig    KafkaConfig    `mapstructure:"kafka"`
 	JaegerConfig   JaegerConfig   `mapstructure:"jaeger"`
 	Service        Service        `mapstructure:"service"`
 }

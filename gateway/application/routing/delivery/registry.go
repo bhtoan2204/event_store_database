@@ -4,6 +4,7 @@ package delivery
 import (
 	"event_sourcing_gateway/application/routing/delivery/handler"
 	"event_sourcing_gateway/application/routing/delivery/handler/payment"
+	"event_sourcing_gateway/application/routing/delivery/handler/user"
 	"event_sourcing_gateway/package/settings"
 )
 
@@ -20,6 +21,24 @@ func buildRegistry(cfg *settings.Config) map[string]routingConfig {
 			payment.NewGetBalanceHandler(cfg),
 			"PaymentService",
 			"GetBalance",
+			"",
+		},
+		"POST:/api/v1/user-service/user/create": {
+			user.NewCreateUserHandler(cfg),
+			"UserService",
+			"CreateUser",
+			"",
+		},
+		"POST:/api/v1/user-service/auth/login": {
+			user.NewLoginHandler(cfg),
+			"UserService",
+			"Login",
+			"",
+		},
+		"POST:/api/v1/user-service/auth/refresh": {
+			user.NewRefreshHandler(cfg),
+			"UserService",
+			"Refresh",
 			"",
 		},
 	}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+package user;
+option go_package = "event_sourcing_gateway/proto/user;user";
+
+message CreateUserRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message CreateUserResponse {
+  string id = 1;
+}

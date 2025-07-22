@@ -51,7 +51,7 @@ func generateGrpcClient(proto *model.Proto, service *model.Service) error {
 		fmt.Println("failed to read template file:", err)
 		return err
 	}
-	configName := utils.ToPascalCase(proto.Module) + "ServiceUrl"
+	configName := utils.ToPascalCase(proto.Module) + "ServiceName"
 	protoFolder := strings.Join(segments[1:len(segments)-1], "/")
 	template = strings.ReplaceAll(template, "<proto_folder>", protoFolder)
 	template = strings.ReplaceAll(template, "<proto_package>", proto.Package)

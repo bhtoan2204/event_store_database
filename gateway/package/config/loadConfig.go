@@ -3,7 +3,6 @@ package config
 import (
 	"event_sourcing_gateway/package/settings"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -11,17 +10,8 @@ import (
 )
 
 func InitLoadConfig() (*settings.Config, error) {
-	env := os.Getenv("GO_ENV")
-	if env == "" {
-		env = "local"
-	}
-
-	if env != "production" {
-		if err := godotenv.Load(
-			fmt.Sprintf(".env.%s", env),
-		); err != nil {
-			panic(fmt.Errorf("error loading .env files: %w", err))
-		}
+	if fallbackErr := godotenv.Load(".env"); fallbackErr != nil {
+		panic(fmt.Errorf("error loading .env files: %w", fallbackErr))
 	}
 
 	v := viper.New()
@@ -42,12 +32,6 @@ func bindEnv(v *viper.Viper) {
 	v.BindEnv("server.port", "SERVER_PORT")
 	v.BindEnv("server.mode", "SERVER_MODE")
 
-	// Redis mappings
-	v.BindEnv("redis.host", "REDIS_HOST")
-	v.BindEnv("redis.port", "REDIS_PORT")
-	v.BindEnv("redis.password", "REDIS_PASSWORD")
-	v.BindEnv("redis.database", "REDIS_DATABASE")
-
 	// Log mappings
 	v.BindEnv("log.log_level", "LOG_LOG_LEVEL")
 	v.BindEnv("log.file_path", "LOG_FILE_PATH")
@@ -62,12 +46,6 @@ func bindEnv(v *viper.Viper) {
 	v.BindEnv("consul.data_center", "CONSUL_DATA_CENTER")
 	v.BindEnv("consul.token", "CONSUL_TOKEN")
 
-	// Kafka mappings
-	v.BindEnv("kafka.broker", "KAFKA_BROKER")
-	v.BindEnv("kafka.port", "KAFKA_PORT")
-	v.BindEnv("kafka.topic", "KAFKA_TOPIC")
-	v.BindEnv("kafka.group_id", "KAFKA_GROUP_ID")
-
 	// Security mappings
 	v.BindEnv("security.jwt_access_secret", "SECURITY_JWT_ACCESS_SECRET")
 	v.BindEnv("security.jwt_refresh_secret", "SECURITY_JWT_REFRESH_SECRET")
@@ -79,5 +57,6 @@ func bindEnv(v *viper.Viper) {
 	v.BindEnv("jaeger.endpoint", "JAEGER_ENDPOINT")
 
 	// Service mappings
-	v.BindEnv("service.user_service_url", "USER_SERVICE_URL")
+	v.BindEnv("service.payment_service_name", "PAYMENT_SERVICE_NAME")
+	v.BindEnv("service.user_service_name", "USER_SERVICE_NAME")
 }

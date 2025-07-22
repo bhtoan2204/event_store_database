@@ -5,6 +5,44 @@ definitions:
       balance:
         type: integer
     type: object
+  event_sourcing_gateway_proto_user.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  event_sourcing_gateway_proto_user.CreateUserResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  event_sourcing_gateway_proto_user.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  event_sourcing_gateway_proto_user.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  event_sourcing_gateway_proto_user.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  event_sourcing_gateway_proto_user.RefreshTokenResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -19,6 +57,7 @@ paths:
     get:
       parameters:
       - description: ' '
+        format: int64
         in: query
         name: id
         type: integer
@@ -32,4 +71,92 @@ paths:
       summary: 'permission:'
       tags:
       - PaymentService
+  /api/v1/user-service/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: <param_description>
+        in: body
+        name: email
+        schema:
+          type: string
+      - description: <param_description>
+        in: body
+        name: password
+        schema:
+          type: string
+      - description: Body example
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/event_sourcing_gateway_proto_user.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event_sourcing_gateway_proto_user.LoginResponse'
+      summary: 'permission:'
+      tags:
+      - UserService
+  /api/v1/user-service/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: <param_description>
+        in: body
+        name: refresh_token
+        schema:
+          type: string
+      - description: Body example
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/event_sourcing_gateway_proto_user.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event_sourcing_gateway_proto_user.RefreshTokenResponse'
+      summary: 'permission:'
+      tags:
+      - UserService
+  /api/v1/user-service/user/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: <param_description>
+        in: body
+        name: email
+        schema:
+          type: string
+      - description: <param_description>
+        in: body
+        name: password
+        schema:
+          type: string
+      - description: Body example
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/event_sourcing_gateway_proto_user.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/event_sourcing_gateway_proto_user.CreateUserResponse'
+      summary: 'permission:'
+      tags:
+      - UserService
 swagger: "2.0"

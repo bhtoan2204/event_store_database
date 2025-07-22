@@ -31,6 +31,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": " ",
                         "name": "id",
                         "in": "query"
@@ -45,6 +46,145 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/user-service/auth/login": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "UserService"
+                ],
+                "summary": "permission:",
+                "parameters": [
+                    {
+                        "description": "\u003cparam_description\u003e",
+                        "name": "email",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "\u003cparam_description\u003e",
+                        "name": "password",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Body example",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/event_sourcing_gateway_proto_user.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/event_sourcing_gateway_proto_user.LoginResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user-service/auth/refresh": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "UserService"
+                ],
+                "summary": "permission:",
+                "parameters": [
+                    {
+                        "description": "\u003cparam_description\u003e",
+                        "name": "refresh_token",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Body example",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/event_sourcing_gateway_proto_user.RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/event_sourcing_gateway_proto_user.RefreshTokenResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user-service/user/create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "UserService"
+                ],
+                "summary": "permission:",
+                "parameters": [
+                    {
+                        "description": "\u003cparam_description\u003e",
+                        "name": "email",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "\u003cparam_description\u003e",
+                        "name": "password",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Body example",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/event_sourcing_gateway_proto_user.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/event_sourcing_gateway_proto_user.CreateUserResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -53,6 +193,66 @@ const docTemplate = `{
             "properties": {
                 "balance": {
                     "type": "integer"
+                }
+            }
+        },
+        "event_sourcing_gateway_proto_user.CreateUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "event_sourcing_gateway_proto_user.CreateUserResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "event_sourcing_gateway_proto_user.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "event_sourcing_gateway_proto_user.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "event_sourcing_gateway_proto_user.RefreshTokenRequest": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "event_sourcing_gateway_proto_user.RefreshTokenResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
                 }
             }
         }
