@@ -87,7 +87,6 @@ func WithLogger(ctx context.Context, logger *LoggerZap) context.Context {
 func DefaultLogger() *LoggerZap {
 	defaultConfig := settings.LogConfig{
 		LogLevel:   "info",
-		FilePath:   "app.log",
 		MaxSize:    10,
 		MaxBackups: 5,
 		MaxAge:     30,
