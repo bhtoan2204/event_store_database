@@ -11,9 +11,9 @@ func UserEntityToUser(user *entities.UserEntity) *persistent_object.User {
 }
 
 func UserToUserEntity(user *persistent_object.User) *entities.UserEntity {
-	entityUser := entities.NewUserEntity(user.Email(), user.Password())
-	entityUser.SetID(user.ID())
-	entityUser.SetCreatedAt(user.CreatedAt())
-	entityUser.SetUpdatedAt(user.UpdatedAt())
+	entityUser := entities.NewUserEntity(user.Email, user.Password)
+	entityUser.SetID(user.Base.ID)
+	entityUser.SetCreatedAt(user.CreatedAt)
+	entityUser.SetUpdatedAt(user.UpdatedAt)
 	return entityUser
 }

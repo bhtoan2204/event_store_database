@@ -2,38 +2,36 @@
 package user
 
 import (
-    
+	"event_sourcing_gateway/package/settings"
+	"event_sourcing_gateway/proto/user"
 
-    "event_sourcing_gateway/package/settings"
-    "event_sourcing_gateway/proto/user"
-    
-    "event_sourcing_gateway/package/wrapper"
-    "event_sourcing_gateway/package/monitor"
-    "go.elastic.co/apm/v2"
-    
+	"event_sourcing_gateway/package/monitor"
+	"event_sourcing_gateway/package/wrapper"
+
+	"go.elastic.co/apm/v2"
 )
 
 type refreshHandler struct {
 }
 
 func NewRefreshHandler(cfg *settings.Config) *refreshHandler {
-    return &refreshHandler{}
+	return &refreshHandler{}
 }
 
-// @Summary permission: 
-// @Tags UserService
-// @Accept json
-// @Produce json
-// @Param refresh_token  body  string false "<param_description>"
-// @Param body  body  user.RefreshTokenRequest true "Body example"
-// @Success 200 {object} user.RefreshTokenResponse
-// @Router /api/v1/user-service/auth/refresh [post]
+// @Summary	permission:
+// @Tags		UserService
+// @Accept		json
+// @Produce	json
+// @Param		refresh_token	body		string						false	"<param_description>"
+// @Param		body			body		user.RefreshTokenRequest	true	"Body example"
+// @Success	200				{object}	user.RefreshTokenResponse
+// @Router		/api/v1/user-service/auth/refresh [post]
 func (handler *refreshHandler) Handle(ctx *wrapper.Context) (interface{}, error) {
-    monitor.SetApmContext(apm.DetachedContext(ctx.Request.Context()))
-    data := user.RefreshTokenRequest{}
-    if err := ctx.BindJSON(&data); err != nil {
-        return nil, err
-    }
+	monitor.SetApmContext(apm.DetachedContext(ctx.Request.Context()))
+	data := user.RefreshTokenRequest{}
+	if err := ctx.BindJSON(&data); err != nil {
+		return nil, err
+	}
 
-    return &data, nil
+	return &data, nil
 }

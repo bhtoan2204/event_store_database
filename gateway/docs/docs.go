@@ -210,8 +210,8 @@ const docTemplate = `{
         "event_sourcing_gateway_proto_user.CreateUserResponse": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "string"
+                "success": {
+                    "type": "boolean"
                 }
             }
         },

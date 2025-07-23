@@ -8,5 +8,5 @@ message CreateUserRequest {
 }
 
 message CreateUserResponse {
-  string id = 1;
+  bool success = 1;
 }

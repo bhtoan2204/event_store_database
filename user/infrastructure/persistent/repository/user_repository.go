@@ -28,7 +28,10 @@ func NewUserRepository(db *gorm.DB) IUserRepository {
 
 func (r *userRepository) CreateUser(user *entities.UserEntity) error {
 	persistentUser := mapper.UserEntityToUser(user)
-	return r.db.Create(persistentUser).Error
+	if err := r.db.Create(persistentUser).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *userRepository) GetUserByID(id int64) (*entities.UserEntity, error) {

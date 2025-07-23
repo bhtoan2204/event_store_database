@@ -2,39 +2,37 @@
 package user
 
 import (
-    
+	"event_sourcing_gateway/package/settings"
+	"event_sourcing_gateway/proto/user"
 
-    "event_sourcing_gateway/package/settings"
-    "event_sourcing_gateway/proto/user"
-    
-    "event_sourcing_gateway/package/wrapper"
-    "event_sourcing_gateway/package/monitor"
-    "go.elastic.co/apm/v2"
-    
+	"event_sourcing_gateway/package/monitor"
+	"event_sourcing_gateway/package/wrapper"
+
+	"go.elastic.co/apm/v2"
 )
 
 type createUserHandler struct {
 }
 
 func NewCreateUserHandler(cfg *settings.Config) *createUserHandler {
-    return &createUserHandler{}
+	return &createUserHandler{}
 }
 
-// @Summary permission: 
-// @Tags UserService
-// @Accept json
-// @Produce json
-// @Param email  body  string false "<param_description>"
-// @Param password  body  string false "<param_description>"
-// @Param body  body  user.CreateUserRequest true "Body example"
-// @Success 200 {object} user.CreateUserResponse
-// @Router /api/v1/user-service/user/create [post]
+// @Summary	permission:
+// @Tags		UserService
+// @Accept		json
+// @Produce	json
+// @Param		email		body		string					false	"<param_description>"
+// @Param		password	body		string					false	"<param_description>"
+// @Param		body		body		user.CreateUserRequest	true	"Body example"
+// @Success	200			{object}	user.CreateUserResponse
+// @Router		/api/v1/user-service/user/create [post]
 func (handler *createUserHandler) Handle(ctx *wrapper.Context) (interface{}, error) {
-    monitor.SetApmContext(apm.DetachedContext(ctx.Request.Context()))
-    data := user.CreateUserRequest{}
-    if err := ctx.BindJSON(&data); err != nil {
-        return nil, err
-    }
+	monitor.SetApmContext(apm.DetachedContext(ctx.Request.Context()))
+	data := user.CreateUserRequest{}
+	if err := ctx.BindJSON(&data); err != nil {
+		return nil, err
+	}
 
-    return &data, nil
+	return &data, nil
 }

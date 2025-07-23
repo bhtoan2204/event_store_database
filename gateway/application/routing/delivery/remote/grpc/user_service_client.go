@@ -6,6 +6,7 @@ import (
 
 	"event_sourcing_gateway/package/settings"
 	"event_sourcing_gateway/proto/user"
+
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/resolver"
 

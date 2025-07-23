@@ -2,7 +2,7 @@ package jwt_utils
 
 import (
 	"errors"
-	"event_sourcing_user/infrastructure/persistent/persistent_object"
+	"event_sourcing_user/domain/entities"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -24,7 +24,7 @@ func NewJWTUtils(accessSecret, refreshSecret string, accessExpiration, refreshEx
 	}
 }
 
-func (j *JWTUtils) GenerateToken(user *persistent_object.User) (string, string, int64, int64, error) {
+func (j *JWTUtils) GenerateToken(user *entities.UserEntity) (string, string, int64, int64, error) {
 	accessSecret := []byte(j.AccessSecret)
 	accessExpiration := time.Now().Add(time.Duration(j.AccessExpiration) * time.Second).Unix()
 	refreshSecret := []byte(j.RefreshSecret)
@@ -88,7 +88,7 @@ func (j *JWTUtils) ExtractAccessClaims(tokenString string) (jwt.MapClaims, error
 	return j.VerifyAccessToken(tokenString)
 }
 
-func (j *JWTUtils) RefreshToken(user *persistent_object.User, refreshTokenString string) (newAccessToken, newRefreshToken string, newAccessExp, newRefreshExp int64, err error) {
+func (j *JWTUtils) RefreshToken(user *entities.UserEntity, refreshTokenString string) (newAccessToken, newRefreshToken string, newAccessExp, newRefreshExp int64, err error) {
 	claims, err := j.VerifyRefreshToken(refreshTokenString)
 	if err != nil {
 		return "", "", 0, 0, err

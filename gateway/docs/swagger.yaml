@@ -14,8 +14,8 @@ definitions:
     type: object
   event_sourcing_gateway_proto_user.CreateUserResponse:
     properties:
-      id:
-        type: string
+      success:
+        type: boolean
     type: object
   event_sourcing_gateway_proto_user.LoginRequest:
     properties:

@@ -5,19 +5,19 @@ import (
 	"event_sourcing_user/proto/user"
 )
 
-type CreateUser struct {
+type LoginCommand struct {
 	Email    string
 	Password string
 }
 
-func NewCreateUser(req *user.CreateUserRequest) *CreateUser {
-	return &CreateUser{
+func NewLoginCommand(req *user.LoginRequest) *LoginCommand {
+	return &LoginCommand{
 		Email:    req.Email,
 		Password: req.Password,
 	}
 }
 
-func (c *CreateUser) Validate() error {
+func (c *LoginCommand) Validate() error {
 	if c.Email == "" {
 		return errors.New("email is required")
 	}

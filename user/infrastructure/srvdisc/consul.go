@@ -1,18 +1,20 @@
 package srvdisc
 
 import (
+	"context"
 	"event_sourcing_user/constant"
+	"event_sourcing_user/package/logger"
 	"event_sourcing_user/utils"
 	"fmt"
-	"log"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/consul/api"
+	"go.uber.org/zap"
 )
 
 type ServiceDiscovery interface {
-	Register(serviceName string, servicePort int) error
-	DeRegister(serviceName string) error
+	Register(ctx context.Context, serviceName string, servicePort int) error
+	DeRegister(ctx context.Context, serviceName string) error
 }
 
 type ConsulServiceDiscovery struct {
@@ -21,7 +23,8 @@ type ConsulServiceDiscovery struct {
 	rrCounter    uint64
 }
 
-func NewConsulServiceDiscovery(cfg *constant.Config) (ServiceDiscovery, error) {
+func NewConsulServiceDiscovery(ctx context.Context, cfg *constant.Config) (ServiceDiscovery, error) {
+	log := logger.FromContext(ctx)
 	consulConfig := api.DefaultConfig()
 	consulConfig.Address = cfg.ConsulConfig.Address
 	consulConfig.Scheme = cfg.ConsulConfig.Scheme
@@ -30,6 +33,7 @@ func NewConsulServiceDiscovery(cfg *constant.Config) (ServiceDiscovery, error) {
 
 	consulClient, err := api.NewClient(consulConfig)
 	if err != nil {
+		log.Error("Error creating Consul client", zap.Error(err))
 		return nil, err
 	}
 
@@ -39,7 +43,8 @@ func NewConsulServiceDiscovery(cfg *constant.Config) (ServiceDiscovery, error) {
 	}, nil
 }
 
-func (s *ConsulServiceDiscovery) Register(serviceName string, servicePort int) error {
+func (s *ConsulServiceDiscovery) Register(ctx context.Context, serviceName string, servicePort int) error {
+	log := logger.FromContext(ctx)
 	serviceID := uuid.New().String()
 	serviceAddress, err := utils.GetInternalIP()
 	if err != nil {
@@ -60,7 +65,7 @@ func (s *ConsulServiceDiscovery) Register(serviceName string, servicePort int) e
 	}
 
 	if err := s.consulClient.Agent().ServiceRegister(registration); err != nil {
-		log.Println("Error registering service", err)
+		log.Error("Error registering service", zap.Error(err))
 		return err
 	}
 	s.id = serviceID
@@ -68,10 +73,11 @@ func (s *ConsulServiceDiscovery) Register(serviceName string, servicePort int) e
 	return nil
 }
 
-func (s *ConsulServiceDiscovery) DeRegister(serviceName string) error {
+func (s *ConsulServiceDiscovery) DeRegister(ctx context.Context, serviceName string) error {
+	log := logger.FromContext(ctx)
 	if err := s.consulClient.Agent().ServiceDeregister(s.id); err != nil {
 		return err
 	}
-	log.Println("DeRegister service successfully", s.id)
+	log.Info("DeRegister service successfully", zap.String("serviceID", s.id))
 	return nil
 }

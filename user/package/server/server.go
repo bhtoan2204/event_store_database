@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"event_sourcing_user/package/logger"
 	"fmt"
 	"net"
 	"net/http"
@@ -74,10 +75,11 @@ func (s *Server) ServeHTTPHandler(ctx context.Context, handler http.Handler) err
 
 // ServeGRPC starts the server and blocks until the provided context is closed.
 func (s *Server) ServeGRPC(ctx context.Context, srv *grpc.Server) error {
+	log := logger.FromContext(ctx)
 	go func() {
 		<-ctx.Done()
 
-		log.Println("ServeGRPC: shutting down")
+		log.Info("ServeGRPC: shutting down")
 		srv.GracefulStop()
 	}()
 
@@ -86,7 +88,7 @@ func (s *Server) ServeGRPC(ctx context.Context, srv *grpc.Server) error {
 		return fmt.Errorf("failed to serve: %w", err)
 	}
 
-	log.Println("ServeGPRC: serve stopped")
+	log.Info("ServeGPRC: serve stopped")
 
 	return nil
 }

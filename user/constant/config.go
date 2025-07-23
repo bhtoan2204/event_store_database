@@ -34,6 +34,14 @@ type ConsulConfig struct {
 	Token      string `mapstructure:"token"`
 }
 
+type LogConfig struct {
+	LogLevel   string `mapstructure:"log_level"`
+	MaxSize    int    `mapstructure:"max_size"`
+	MaxBackups int    `mapstructure:"max_backups"`
+	MaxAge     int    `mapstructure:"max_age"`
+	Compress   bool   `mapstructure:"compress"`
+}
+
 type Config struct {
 	Server       ServerConfig   `mapstructure:"server"`
 	Postgres     PostgresConfig `mapstructure:"postgres"`
