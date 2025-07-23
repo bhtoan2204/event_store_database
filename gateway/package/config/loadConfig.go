@@ -34,7 +34,6 @@ func bindEnv(v *viper.Viper) {
 
 	// Log mappings
 	v.BindEnv("log.log_level", "LOG_LOG_LEVEL")
-	v.BindEnv("log.file_path", "LOG_FILE_PATH")
 	v.BindEnv("log.max_size", "LOG_MAX_SIZE")
 	v.BindEnv("log.max_backups", "LOG_MAX_BACKUPS")
 	v.BindEnv("log.max_age", "LOG_MAX_AGE")

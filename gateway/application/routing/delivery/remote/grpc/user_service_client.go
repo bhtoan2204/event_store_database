@@ -4,16 +4,14 @@ package grpc
 import (
 	"fmt"
 
-	"google.golang.org/grpc/metadata"
-
 	"event_sourcing_gateway/package/settings"
 	"event_sourcing_gateway/proto/user"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/resolver"
 
-	"context"
 	"event_sourcing_gateway/package/grpc"
 	"event_sourcing_gateway/package/monitor"
 	"event_sourcing_gateway/package/svcdisc"
-	"github.com/hashicorp/consul/api"
 )
 
 func (client *userServiceClient) initMethodRegistry() {
@@ -27,25 +25,24 @@ func (client *userServiceClient) initMethodRegistry() {
 type userServiceClient struct {
 	grpcClient     user.UserServiceClient
 	methodRegistry map[string]func(interface{}, map[string]string) (interface{}, error)
-	svcdisc        *api.AgentService
 }
 
 func NewUserServiceClient(config *settings.Config) *userServiceClient {
 	// using WithInsecure() because no SSL running
 	consul := svcdisc.NewConsul(config)
-	service, err := consul.GetService(context.Background(), config.Service.UserServiceName)
-	if err != nil {
-		fmt.Println("Could not get service:", err)
-	}
+	resolver.Register(consul.NewResolverBuilder(config.Service.UserServiceName))
 
-	cc, err := grpc.CreateGRPCClientConn(config.Service.UserServiceName, false)
+	cc, err := grpc.CreateGRPCClientConn(
+		fmt.Sprintf("consul:///%s", config.Service.UserServiceName),
+		false,
+	)
 	if err != nil {
 		fmt.Println("Could not connect:", err)
+		return nil
 	}
 
 	client := userServiceClient{
 		grpcClient: user.NewUserServiceClient(cc),
-		svcdisc:    service,
 	}
 	client.initMethodRegistry()
 

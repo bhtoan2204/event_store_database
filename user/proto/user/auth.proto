@@ -1,6 +1,6 @@
 syntax = "proto3";
 package user;
-option go_package = "event_sourcing_gateway/proto/user;user";
+option go_package = "event_sourcing_user/proto/user;user";
 
 message LoginRequest {
   string email = 1;

@@ -77,5 +77,6 @@ func CreateGRPCClientConn(host string, tlsEnabled bool) (*grpc.ClientConn, error
 			grpcZap.UnaryClientInterceptor(),
 		),
 		grpc.WithStatsHandler(tracer.GrpcStatsHandler()),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"round_robin"}`),
 	)
 }

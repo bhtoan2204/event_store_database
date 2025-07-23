@@ -15,7 +15,6 @@ type SecurityConfig struct {
 
 type LogConfig struct {
 	LogLevel   string `mapstructure:"log_level"`
-	FilePath   string `mapstructure:"file_path"`
 	MaxSize    int    `mapstructure:"max_size"`
 	MaxBackups int    `mapstructure:"max_backups"`
 	MaxAge     int    `mapstructure:"max_age"`

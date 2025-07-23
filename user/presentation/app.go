@@ -72,6 +72,7 @@ func (a *app) Start(ctx context.Context) error {
 		log.Println("Error creating Consul service discovery", err)
 		return err
 	}
+	defer consulConnection.DeRegister(a.cfg.Server.ServiceName)
 
 	log.Println("Starting server")
 	return grpcServer.ServeGRPC(ctx, rpcServer)

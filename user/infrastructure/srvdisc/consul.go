@@ -17,6 +17,7 @@ type ServiceDiscovery interface {
 
 type ConsulServiceDiscovery struct {
 	consulClient *api.Client
+	id           string
 	rrCounter    uint64
 }
 
@@ -44,11 +45,6 @@ func (s *ConsulServiceDiscovery) Register(serviceName string, servicePort int) e
 	if err != nil {
 		return err
 	}
-	s.rrCounter++
-	fmt.Println("serviceID", serviceID)
-	fmt.Println("serviceName", serviceName)
-	fmt.Println("serviceAddress", serviceAddress)
-	fmt.Println("servicePort", servicePort)
 	registration := &api.AgentServiceRegistration{
 		ID:      serviceID,
 		Name:    serviceName,
@@ -67,17 +63,15 @@ func (s *ConsulServiceDiscovery) Register(serviceName string, servicePort int) e
 		log.Println("Error registering service", err)
 		return err
 	}
+	s.id = serviceID
 
 	return nil
 }
 
 func (s *ConsulServiceDiscovery) DeRegister(serviceName string) error {
-	serviceID := fmt.Sprintf("%s-%d", serviceName, s.rrCounter)
-	s.rrCounter++
-
-	if err := s.consulClient.Agent().ServiceDeregister(serviceID); err != nil {
+	if err := s.consulClient.Agent().ServiceDeregister(s.id); err != nil {
 		return err
 	}
-
+	log.Println("DeRegister service successfully", s.id)
 	return nil
 }

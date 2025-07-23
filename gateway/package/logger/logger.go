@@ -61,7 +61,7 @@ func NewLogger(config settings.LogConfig) *LoggerZap {
 
 	encoder := getEncoderLog()
 	hook := lumberjack.Logger{
-		Filename:   config.FilePath,
+		Filename:   "app.log",
 		MaxSize:    config.MaxSize,
 		MaxBackups: config.MaxBackups,
 		MaxAge:     config.MaxAge,
