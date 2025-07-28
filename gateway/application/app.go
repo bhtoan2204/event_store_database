@@ -4,11 +4,13 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"time"
 
 	"event_sourcing_gateway/application/routing/delivery"
 	"event_sourcing_gateway/application/routing/delivery/service"
 	"event_sourcing_gateway/application/routing/usecase"
 	_ "event_sourcing_gateway/docs"
+	"event_sourcing_gateway/infras/redis_client"
 	"event_sourcing_gateway/middleware"
 	"event_sourcing_gateway/package/logger"
 	"event_sourcing_gateway/package/server"
@@ -46,10 +48,16 @@ func (s *Server) Routes(ctx context.Context) http.Handler {
 	r := gin.New()
 	r.MaxMultipartMemory = 50 << 20
 	r.RedirectTrailingSlash = false
+	redisClient, err := redis_client.NewRedisClient(&s.cfg.RedisConfig)
+	if err != nil {
+		log.Error("failed to create redis client", zap.Error(err))
+		return nil
+	}
 
 	r.Use(middleware.ErrorHandler())
 	r.Use(middleware.SetRequestID())
 	r.Use(middleware.SetLogger())
+	r.Use(middleware.NewRateLimitMiddleware(redisClient, 100, 1*time.Minute).Middleware())
 	r.Use(tracer.GinMiddleware("gateway"))
 	r.Use(gin.CustomRecovery(func(c *gin.Context, err interface{}) {
 		log.Error("something went wrong", zap.Int("status", http.StatusInternalServerError))

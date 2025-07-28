@@ -58,6 +58,36 @@ services:
     depends_on:
       - zookeeper
       
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.1
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=changeme
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+
+  debezium:
+    image: debezium/connect:3.0.0.Final
+    depends_on:
+      - kafka
+      - elastic
+    ports:
+      - "8083:8083"
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:29092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=debezium_configs
+      - OFFSET_STORAGE_TOPIC=debezium_offsets
+      - STATUS_STORAGE_TOPIC=debezium_statuses
+      - KEY_CONVERTER_SCHEMAS_ENABLE=false
+      - VALUE_CONVERTER_SCHEMAS_ENABLE=false
+    restart: always
+
 volumes:
   postgres_data:
   esdb-data:
+  elastic_data:
