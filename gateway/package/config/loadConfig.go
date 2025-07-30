@@ -58,4 +58,15 @@ func bindEnv(v *viper.Viper) {
 	// Service mappings
 	v.BindEnv("service.payment_service_name", "PAYMENT_SERVICE_NAME")
 	v.BindEnv("service.user_service_name", "USER_SERVICE_NAME")
+
+	// Redis mappings
+	v.BindEnv("redis.connection_url", "REDIS_CONNECTION_URL")
+	v.BindEnv("redis.db", "REDIS_DB")
+	v.BindEnv("redis.pool_size", "REDIS_POOL_SIZE")
+	v.BindEnv("redis.dial_timeout_seconds", "REDIS_DIAL_TIMEOUT_SECONDS")
+	v.BindEnv("redis.read_timeout_seconds", "REDIS_READ_TIMEOUT_SECONDS")
+	v.BindEnv("redis.write_timeout_seconds", "REDIS_WRITE_TIMEOUT_SECONDS")
+	v.BindEnv("redis.idle_timeout_seconds", "REDIS_IDLE_TIMEOUT_SECONDS")
+	v.BindEnv("redis.max_idle_conn_number", "REDIS_MAX_IDLE_CONN_NUMBER")
+	v.BindEnv("redis.max_active_conn_number", "REDIS_MAX_ACTIVE_CONN_NUMBER")
 }

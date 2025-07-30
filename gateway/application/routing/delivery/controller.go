@@ -1,12 +1,10 @@
 package delivery
 
 import (
-	"event_sourcing_gateway/constant"
 	"event_sourcing_gateway/package/logger"
 	"event_sourcing_gateway/package/settings"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"event_sourcing_gateway/package/grpc"
 
@@ -66,13 +64,9 @@ func (h *RoutingHandler) handle() gin.HandlerFunc {
 			return
 		}
 
-		uid := ctx.GetInt64(constant.KeyUserLoginID)
 		metadata := map[string]string{
 			"ip-address":      ctx.ClientIP(),
 			"accept-language": ctx.GetHeader("Accept-Language"),
-			"token":           ctx.GetString(constant.KeyAuthToken),
-			"uid":             strconv.FormatInt(uid, 10),
-			"user-email":      ctx.GetString(constant.KeyUserLoginEmail),
 		}
 
 		data, err := routingCfg.handler.Handle(ctx)

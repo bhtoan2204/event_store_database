@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"event_sourcing_gateway/constant"
 	"net/http"
 	"strconv"
 	"time"
@@ -28,7 +29,7 @@ func (r *RateLimitMiddleware) Middleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := context.Background()
 		identifier := c.ClientIP()
-		key := "rate_limit:" + identifier
+		key := constant.RateLimitKeyPrefix + identifier
 
 		now := time.Now().UnixMilli()
 		windowStart := now - r.window.Milliseconds()

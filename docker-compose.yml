@@ -14,6 +14,8 @@ services:
     volumes:
       - esdb-data:/var/lib/eventstore
     restart: unless-stopped
+    networks:
+      - eventstore-net
 
   postgres:
     image: postgres:15
@@ -26,6 +28,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     restart: unless-stopped
+    networks:
+      - eventstore-net
 
   consul:
     image: hashicorp/consul:latest
@@ -35,12 +39,16 @@ services:
       - "8600:8600/udp"
     volumes:
       - ./config:/consul/config
+    networks:
+      - eventstore-net
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.2
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - eventstore-net
 
   kafka:
     image: confluentinc/cp-kafka:7.3.2
@@ -57,7 +65,9 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
-      
+    networks:
+      - eventstore-net
+
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.15.1
     ports:
@@ -69,6 +79,8 @@ services:
       - ELASTIC_PASSWORD=changeme
     volumes:
       - elastic_data:/usr/share/elasticsearch/data
+    networks:
+      - eventstore-net
 
   debezium:
     image: debezium/connect:3.0.0.Final
@@ -86,8 +98,25 @@ services:
       - KEY_CONVERTER_SCHEMAS_ENABLE=false
       - VALUE_CONVERTER_SCHEMAS_ENABLE=false
     restart: always
+    networks:
+      - eventstore-net
+
+  redis-master:
+    image: redis:7.2
+    container_name: redis-master
+    command: redis-server --requirepass mypassword --appendonly yes
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=mypassword
+    networks:
+      - eventstore-net
 
 volumes:
   postgres_data:
   esdb-data:
   elastic_data:
+
+networks:
+  eventstore-net:
+    driver: bridge
