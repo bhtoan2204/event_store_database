@@ -1,9 +1,13 @@
 package eventstore
 
 import (
-	"log"
+	"context"
+	"event_sourcing_payment/constant"
+	"event_sourcing_payment/package/logger"
+	"strconv"
 
-	esdb "github.com/EventStore/EventStore-Client-Go/v3/esdb"
+	"github.com/EventStore/EventStore-Client-Go/v3/esdb"
+	"go.uber.org/zap"
 )
 
 var _ IEventStoreConnection = &EventStoreConnection{}
@@ -16,20 +20,23 @@ type EventStoreConnection struct {
 	esdbClient *esdb.Client
 }
 
-func NewEventStoreConnection() IEventStoreConnection {
-	settings, err := esdb.ParseConnectionString("esdb://localhost:2113?tls=false")
+func NewEventStoreConnection(ctx context.Context, config *constant.Config) (IEventStoreConnection, error) {
+	log := logger.FromContext(ctx)
+	connectionString := "esdb://" + config.EventStore.Host + ":" + strconv.Itoa(config.EventStore.Port) + "?tls=false"
+	settings, err := esdb.ParseConnectionString(connectionString)
 	if err != nil {
-		log.Fatalf("Lỗi cấu hình ESDB: %v", err)
+		log.Error("Error parsing connection string", zap.Error(err))
+		return nil, err
 	}
-
 	db, err := esdb.NewClient(settings)
 	if err != nil {
-		log.Fatalf("Lỗi khởi tạo ESDB client: %v", err)
+		log.Error("Error creating ESDB client", zap.Error(err))
+		return nil, err
 	}
 
 	return &EventStoreConnection{
 		esdbClient: db,
-	}
+	}, nil
 }
 
 func (e *EventStoreConnection) GetClient() *esdb.Client {

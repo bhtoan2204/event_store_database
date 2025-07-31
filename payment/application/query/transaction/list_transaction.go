@@ -1,7 +1,8 @@
-package transaction
+package query
 
 import (
 	"context"
+	"event_sourcing_payment/domain/usecase"
 	"event_sourcing_payment/package/querybus"
 	"fmt"
 )
@@ -17,6 +18,11 @@ func (q ListTransactionQuery) QueryName() string {
 }
 
 type ListTransactionHandler struct {
+	useCase usecase.IUseCase
+}
+
+func NewListTransactionHandler(useCase usecase.IUseCase) *ListTransactionHandler {
+	return &ListTransactionHandler{useCase: useCase}
 }
 
 func (h *ListTransactionHandler) Handle(ctx context.Context, query querybus.IQuery) error {

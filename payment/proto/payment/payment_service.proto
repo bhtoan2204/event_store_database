@@ -2,6 +2,8 @@ syntax = "proto3";
 package payment;
 option go_package = "event_sourcing_payment/proto/payment;payment";
 
+import "payment/transaction.proto";
+
 message ErrorResponse {
 	string root_error = 1;
 	string message = 2;
@@ -10,4 +12,5 @@ message ErrorResponse {
 }
 
 service PaymentService {
+	rpc CreateTransaction(CreateTransactionRequest) returns (CreateTransactionResponse);
 }

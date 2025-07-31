@@ -40,9 +40,23 @@ type EventStoreConfig struct {
 	Port int    `mapstructure:"port"`
 }
 
+type RedisConfig struct {
+	ConnectionURL       string `mapstructure:"connection_url"`
+	Password            string `mapstructure:"password"`
+	DB                  int    `mapstructure:"db"`
+	PoolSize            int    `mapstructure:"pool_size"`
+	DialTimeoutSeconds  int    `mapstructure:"dial_timeout_seconds"`
+	ReadTimeoutSeconds  int    `mapstructure:"read_timeout_seconds"`
+	WriteTimeoutSeconds int    `mapstructure:"write_timeout_seconds"`
+	IdleTimeoutSeconds  int    `mapstructure:"idle_timeout_seconds"`
+	MaxIdleConn         int    `mapstructure:"max_idle_conn_number"`
+	MaxActiveConn       int    `mapstructure:"max_active_conn_number"`
+}
+
 type Config struct {
 	Server       ServerConfig     `mapstructure:"server"`
 	Postgres     PostgresConfig   `mapstructure:"postgres"`
 	ConsulConfig ConsulConfig     `mapstructure:"consul"`
 	EventStore   EventStoreConfig `mapstructure:"event_store"`
+	Redis        RedisConfig      `mapstructure:"redis"`
 }

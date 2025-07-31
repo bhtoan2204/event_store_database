@@ -9,22 +9,22 @@ import (
 )
 
 type GrpcPresentation interface {
-	AuthService
-	UserService
+	AuthGrpcService
+	UserGrpcService
 	GRPCServer() *grpc.Server
 }
 type grpcPresentation struct {
 	server *grpc.Server
 
-	AuthService
-	UserService
+	AuthGrpcService
+	UserGrpcService
 }
 
 func NewGrpcPresentation(s *grpc.Server, rf repository.IRepositoryFactory, config *constant.Config, usecase usecase.Usecase) (GrpcPresentation, error) {
 	return &grpcPresentation{
-		server:      s,
-		AuthService: NewAuthService(usecase.AuthUsecase()),
-		UserService: NewUserService(usecase.UserUsecase()),
+		server:          s,
+		AuthGrpcService: NewAuthGrpcService(usecase.AuthUsecase()),
+		UserGrpcService: NewUserGrpcService(usecase.UserUsecase()),
 	}, nil
 }
 

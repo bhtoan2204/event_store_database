@@ -7,3 +7,7 @@ const (
 	TransactionTypeWithdraw TransactionType = "withdraw"
 	TransactionTypeTransfer TransactionType = "transfer"
 )
+
+func (t TransactionType) String() string {
+	return string(t)
+}

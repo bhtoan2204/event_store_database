@@ -1,7 +1,8 @@
-package user
+package command
 
 import (
 	"context"
+	"event_sourcing_payment/domain/usecase"
 	"event_sourcing_payment/package/commandbus"
 	"fmt"
 )
@@ -16,6 +17,11 @@ func (c CreateUserCommand) CommandName() string {
 }
 
 type CreateUserHandler struct {
+	useCase usecase.IUseCase
+}
+
+func NewCreateUserHandler(useCase usecase.IUseCase) *CreateUserHandler {
+	return &CreateUserHandler{useCase: useCase}
 }
 
 func (h *CreateUserHandler) Handle(ctx context.Context, cmd commandbus.ICommand) error {

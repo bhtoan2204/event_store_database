@@ -34,7 +34,7 @@ type app struct {
 
 func NewApp(ctx context.Context, cfg *constant.Config) (App, error) {
 	log := logger.FromContext(ctx)
-	persistentConnection, err := persistent.NewPersistentConnection(&cfg.Postgres)
+	persistentConnection, err := persistent.NewPersistentConnection(ctx, &cfg.Postgres)
 	if err != nil {
 		log.Error("Error initializing persistent connection", zap.Error(err))
 		return nil, err

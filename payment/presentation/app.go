@@ -2,9 +2,22 @@ package presentation
 
 import (
 	"context"
+
+	"event_sourcing_payment/application/command"
+	"event_sourcing_payment/application/event"
+	"event_sourcing_payment/application/query"
 	"event_sourcing_payment/constant"
+	"event_sourcing_payment/domain/usecase"
+	"event_sourcing_payment/infrastructure/eventstore"
+	"event_sourcing_payment/infrastructure/eventstore/esdb_listener"
+	"event_sourcing_payment/infrastructure/eventstore/esdb_storer"
+	"event_sourcing_payment/infrastructure/projection"
+	"event_sourcing_payment/infrastructure/projection/persistent_object"
+	"event_sourcing_payment/infrastructure/projection/repository"
+	"event_sourcing_payment/infrastructure/redis_client"
 	"event_sourcing_payment/infrastructure/srvdisc"
 	"event_sourcing_payment/package/grpc_infra"
+	"event_sourcing_payment/package/locker"
 	"event_sourcing_payment/package/logger"
 	"event_sourcing_payment/package/server"
 	"event_sourcing_payment/presentation/grpc_layer"
@@ -22,24 +35,87 @@ type App interface {
 }
 
 type app struct {
-	cfg *constant.Config
+	cfg         *constant.Config
+	locker      locker.Locker
+	commandBus  *command.CommandBus
+	eventBus    *event.EventBus
+	queryBus    *query.QueryBus
+	eventStorer esdb_storer.IEventStorer
+	useCase     usecase.IUseCase
 }
 
 func NewApp(ctx context.Context, cfg *constant.Config) (App, error) {
-	// log := logger.FromContext(ctx)
+	log := logger.FromContext(ctx)
+	log.Info("Initializing app")
 
-	return &app{cfg: cfg}, nil
+	// Connect to Projection DB
+	projectionConn, err := projection.NewProjectionConnection(ctx, &cfg.Postgres)
+	if err != nil {
+		log.Error("Failed to connect to projection DB", zap.Error(err))
+		return nil, err
+	}
+	err = projectionConn.SyncTable(
+		&persistent_object.Account{},
+		&persistent_object.Transaction{},
+		&persistent_object.Outbox{},
+	)
+	if err != nil {
+		log.Error("Failed to sync projection tables", zap.Error(err))
+		return nil, err
+	}
+
+	// Connect to Event Store
+	eventStoreConn, err := eventstore.NewEventStoreConnection(ctx, cfg)
+	if err != nil {
+		log.Error("Failed to connect to event store", zap.Error(err))
+		return nil, err
+	}
+
+	// Redis and Locker
+	redisClient, err := redis_client.NewRedisClient(ctx, &cfg.Redis)
+	if err != nil {
+		log.Error("Failed to initialize Redis client", zap.Error(err))
+		return nil, err
+	}
+	lock := locker.NewLocker(ctx, redisClient)
+
+	useCase := usecase.NewUseCase()
+
+	// Infrastructure setup
+	eventBus := event.NewEventBus(useCase)
+	repo := repository.NewFactoryRepository(ctx, projectionConn)
+	esdbStorer := esdb_storer.NewEsdbStorer(ctx, eventStoreConn.GetClient())
+	commandBus := command.NewCommandBus(esdbStorer, useCase)
+	queryBus := query.NewQueryBus(repo, useCase)
+
+	// Start event listener
+	esdbListener := esdb_listener.NewEsdbListener(ctx, eventStoreConn.GetClient(), eventBus)
+	esdbListener.Start(ctx)
+
+	log.Info("App initialized successfully")
+
+	return &app{
+		cfg:         cfg,
+		locker:      lock,
+		commandBus:  commandBus,
+		eventBus:    eventBus,
+		queryBus:    queryBus,
+		eventStorer: esdbStorer,
+		useCase:     useCase,
+	}, nil
 }
 
 func (a *app) Start(ctx context.Context) error {
 	log := logger.FromContext(ctx)
-	log.Info("Starting server")
+	log.Info("Starting gRPC server")
+
 	panicHandler := func(p any) (err error) {
 		return status.Errorf(codes.Internal, "%s", p)
 	}
 
-	var sopts []grpc.ServerOption
-	sopts = append(sopts,
+	// gRPC interceptors
+	var serverOpts []grpc.ServerOption
+	serverOpts = append(serverOpts,
 		grpc.ChainUnaryInterceptor(
 			grpc_infra.MonitorRequestDuration(nil),
 			grpc_infra.Recovery(panicHandler),
@@ -47,32 +123,35 @@ func (a *app) Start(ctx context.Context) error {
 			grpc_infra.HandleError(),
 		),
 	)
-	rpcServer := grpc.NewServer(sopts...)
 
-	healthCheck := grpc_infra.NewHealthService()
-	grpc_health_v1.RegisterHealthServer(rpcServer, healthCheck)
+	rpcServer := grpc.NewServer(serverOpts...)
 
-	paymentService, err := grpc_layer.NewGrpcPresentation(rpcServer, a.cfg)
+	// Health check service
+	grpc_health_v1.RegisterHealthServer(rpcServer, grpc_infra.NewHealthService())
+
+	// Register payment service
+	paymentService, err := grpc_layer.NewGrpcPresentation(rpcServer, a.cfg, a.useCase)
 	if err != nil {
-		log.Error("Error creating gRPC presentation", zap.Error(err))
+		log.Error("Failed to initialize payment service", zap.Error(err))
 		return err
 	}
 	payment.RegisterPaymentServiceServer(rpcServer, paymentService)
 
-	grpcServer, err := server.New()
+	// Create GRPC Server
+	grpcSrv, err := server.New()
 	if err != nil {
-		log.Error("Error creating gRPC server", zap.Error(err))
+		log.Error("Failed to create GRPC server", zap.Error(err))
 		return err
 	}
 
-	consulConnection, err := srvdisc.NewConsulServiceDiscovery(ctx, a.cfg)
+	// Consul service registration
+	consulConn, err := srvdisc.NewConsulServiceDiscovery(ctx, a.cfg)
 	if err != nil {
-		log.Error("Error creating Consul service discovery", zap.Error(err))
+		log.Error("Failed to initialize Consul", zap.Error(err))
 		return err
 	}
+	consulConn.Register(ctx, a.cfg.Server.ServiceName, grpcSrv.PortInt())
+	defer consulConn.DeRegister(ctx, a.cfg.Server.ServiceName)
 
-	consulConnection.Register(ctx, a.cfg.Server.ServiceName, grpcServer.PortInt())
-	defer consulConnection.DeRegister(ctx, a.cfg.Server.ServiceName)
-
-	return grpcServer.ServeGRPC(ctx, rpcServer)
+	return grpcSrv.ServeGRPC(ctx, rpcServer)
 }

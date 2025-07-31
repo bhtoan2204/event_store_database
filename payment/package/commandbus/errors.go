@@ -3,6 +3,6 @@ package commandbus
 import "errors"
 
 var (
-	ErrHandlerAlreadyRegistered = errors.New("handler already registered")
-	ErrHandlerNotFound          = errors.New("handler not found")
+	ErrHandlerAlreadyRegistered = errors.New("command handler already registered")
+	ErrHandlerNotFound          = errors.New("command handler not found")
 )

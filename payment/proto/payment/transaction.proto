@@ -1,0 +1,12 @@
+syntax = "proto3";
+package payment;
+option go_package = "event_sourcing_payment/proto/payment;payment";
+
+message CreateTransactionRequest {
+    string amount = 1;
+    string type = 2;
+}
+
+message CreateTransactionResponse {
+    string transaction_code = 1;
+}

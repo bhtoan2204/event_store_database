@@ -1,9 +1,9 @@
-package persistent
+package projection
 
 import (
 	"context"
-	"event_sourcing_user/constant"
-	"event_sourcing_user/package/logger"
+	"event_sourcing_payment/constant"
+	"event_sourcing_payment/package/logger"
 	"fmt"
 	"time"
 
@@ -13,11 +13,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type PersistentConnection struct {
+type ProjectionConnection struct {
 	db *gorm.DB
 }
 
-func NewPersistentConnection(ctx context.Context, cfg *constant.PostgresConfig) (*PersistentConnection, error) {
+func NewProjectionConnection(ctx context.Context, cfg *constant.PostgresConfig) (*ProjectionConnection, error) {
 	log := logger.FromContext(ctx)
 	if cfg == nil {
 		log.Fatal("PostgresConfig is nil")
@@ -47,15 +47,15 @@ func NewPersistentConnection(ctx context.Context, cfg *constant.PostgresConfig) 
 
 	log.Info("Successfully connected to Postgres database")
 
-	return &PersistentConnection{
+	return &ProjectionConnection{
 		db: db,
 	}, nil
 }
 
-func (p *PersistentConnection) SyncTable(models ...interface{}) error {
+func (p *ProjectionConnection) SyncTable(models ...interface{}) error {
 	return p.db.AutoMigrate(models...)
 }
 
-func (p *PersistentConnection) GetDB() *gorm.DB {
+func (p *ProjectionConnection) GetDB() *gorm.DB {
 	return p.db
 }

@@ -112,11 +112,51 @@ services:
     networks:
       - eventstore-net
 
+  temporal:
+    image: temporalio/auto-setup:1.22.3
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=root
+      - POSTGRES_PWD=root
+      - POSTGRES_SEEDS=postgres
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml
+    ports:
+      - "7233:7233" # gRPC default port for Temporal SDK
+    depends_on:
+      - postgres
+    volumes:
+      - temporal_data:/var/lib/temporal
+    networks:
+      - eventstore-net
+
+  # temporal-admin-tools:
+  #   image: temporalio/admin-tools:1.22.3
+  #   depends_on:
+  #     - temporal
+  #   entrypoint: /bin/sh -c 'while ! nc -z temporal 7233; do sleep 1; done; sleep 5; tctl --ns default namespace describe || tctl --ns default namespace register --rd 1'
+  #   environment:
+  #     TEMPORAL_CLI_ADDRESS: temporal:7233
+  #   networks:
+  #     - eventstore-net
+
+  temporal-ui:
+    image: temporalio/ui:2.15.0
+    ports:
+      - "8233:8233"
+    environment:
+      - TEMPORAL_GRPC_ENDPOINT=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=*
+    depends_on:
+      - temporal
+    networks:
+      - eventstore-net
+
 volumes:
   postgres_data:
   esdb-data:
   elastic_data:
-
+  temporal_data:
 networks:
   eventstore-net:
-    driver: bridge
+    driver: bridge  

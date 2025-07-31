@@ -11,19 +11,19 @@ import (
 	"go.uber.org/zap"
 )
 
-type UserService interface {
+type UserGrpcService interface {
 	CreateUser(ctx context.Context, req *user.CreateUserRequest) (*user.CreateUserResponse, error)
 }
 
-type userService struct {
+type userGrpcService struct {
 	usecase usecase.UserUsecase
 }
 
-func NewUserService(usecase usecase.UserUsecase) UserService {
-	return &userService{usecase: usecase}
+func NewUserGrpcService(usecase usecase.UserUsecase) UserGrpcService {
+	return &userGrpcService{usecase: usecase}
 }
 
-func (g *userService) CreateUser(ctx context.Context, req *user.CreateUserRequest) (*user.CreateUserResponse, error) {
+func (g *userGrpcService) CreateUser(ctx context.Context, req *user.CreateUserRequest) (*user.CreateUserResponse, error) {
 	log := logger.FromContext(ctx)
 	command := command.NewCreateUser(req)
 	if err := command.Validate(); err != nil {

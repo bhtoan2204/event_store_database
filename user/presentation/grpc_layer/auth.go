@@ -12,20 +12,20 @@ import (
 	"go.uber.org/zap"
 )
 
-type AuthService interface {
+type AuthGrpcService interface {
 	Login(ctx context.Context, req *user.LoginRequest) (*user.LoginResponse, error)
 	Refresh(ctx context.Context, req *user.RefreshTokenRequest) (*user.RefreshTokenResponse, error)
 }
 
-type authService struct {
+type authGrpcService struct {
 	usecase usecase.AuthUsecase
 }
 
-func NewAuthService(usecase usecase.AuthUsecase) AuthService {
-	return &authService{usecase: usecase}
+func NewAuthGrpcService(usecase usecase.AuthUsecase) AuthGrpcService {
+	return &authGrpcService{usecase: usecase}
 }
 
-func (g *authService) Login(ctx context.Context, req *user.LoginRequest) (*user.LoginResponse, error) {
+func (g *authGrpcService) Login(ctx context.Context, req *user.LoginRequest) (*user.LoginResponse, error) {
 	log := logger.FromContext(ctx)
 	command := command.NewLoginCommand(req)
 	if err := command.Validate(); err != nil {
@@ -43,7 +43,7 @@ func (g *authService) Login(ctx context.Context, req *user.LoginRequest) (*user.
 	}, nil
 }
 
-func (g *authService) Refresh(ctx context.Context, req *user.RefreshTokenRequest) (*user.RefreshTokenResponse, error) {
+func (g *authGrpcService) Refresh(ctx context.Context, req *user.RefreshTokenRequest) (*user.RefreshTokenResponse, error) {
 	fmt.Println("Refresh request received")
 	return nil, nil
 }
