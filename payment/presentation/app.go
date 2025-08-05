@@ -8,16 +8,15 @@ import (
 	"event_sourcing_payment/application/query"
 	"event_sourcing_payment/constant"
 	"event_sourcing_payment/domain/usecase"
+	"event_sourcing_payment/infrastructure/adapter"
 	"event_sourcing_payment/infrastructure/eventstore"
 	"event_sourcing_payment/infrastructure/eventstore/esdb_listener"
 	"event_sourcing_payment/infrastructure/eventstore/esdb_storer"
 	"event_sourcing_payment/infrastructure/projection"
 	"event_sourcing_payment/infrastructure/projection/persistent_object"
 	"event_sourcing_payment/infrastructure/projection/repository"
-	"event_sourcing_payment/infrastructure/redis_client"
 	"event_sourcing_payment/infrastructure/srvdisc"
 	"event_sourcing_payment/package/grpc_infra"
-	"event_sourcing_payment/package/locker"
 	"event_sourcing_payment/package/logger"
 	"event_sourcing_payment/package/server"
 	"event_sourcing_payment/presentation/grpc_layer"
@@ -36,7 +35,7 @@ type App interface {
 
 type app struct {
 	cfg         *constant.Config
-	locker      locker.Locker
+	adapter     adapter.IAdapter
 	commandBus  *command.CommandBus
 	eventBus    *event.EventBus
 	queryBus    *query.QueryBus
@@ -72,31 +71,28 @@ func NewApp(ctx context.Context, cfg *constant.Config) (App, error) {
 	}
 
 	// Redis and Locker
-	redisClient, err := redis_client.NewRedisClient(ctx, &cfg.Redis)
+	adapter, err := adapter.NewAdapter(ctx, cfg)
 	if err != nil {
-		log.Error("Failed to initialize Redis client", zap.Error(err))
+		log.Error("Failed to initialize adapter", zap.Error(err))
 		return nil, err
 	}
-	lock := locker.NewLocker(ctx, redisClient)
 
-	useCase := usecase.NewUseCase()
-
-	// Infrastructure setup
-	eventBus := event.NewEventBus(useCase)
 	repo := repository.NewFactoryRepository(ctx, projectionConn)
 	esdbStorer := esdb_storer.NewEsdbStorer(ctx, eventStoreConn.GetClient())
+	useCase := usecase.NewUseCase(esdbStorer)
+	eventBus := event.NewEventBus()
 	commandBus := command.NewCommandBus(esdbStorer, useCase)
 	queryBus := query.NewQueryBus(repo, useCase)
 
 	// Start event listener
-	esdbListener := esdb_listener.NewEsdbListener(ctx, eventStoreConn.GetClient(), eventBus)
+	esdbListener := esdb_listener.NewEsdbListener(eventStoreConn.GetClient(), eventBus)
 	esdbListener.Start(ctx)
 
 	log.Info("App initialized successfully")
 
 	return &app{
 		cfg:         cfg,
-		locker:      lock,
+		adapter:     adapter,
 		commandBus:  commandBus,
 		eventBus:    eventBus,
 		queryBus:    queryBus,
@@ -130,7 +126,7 @@ func (a *app) Start(ctx context.Context) error {
 	grpc_health_v1.RegisterHealthServer(rpcServer, grpc_infra.NewHealthService())
 
 	// Register payment service
-	paymentService, err := grpc_layer.NewGrpcPresentation(rpcServer, a.cfg, a.useCase)
+	paymentService, err := grpc_layer.NewGrpcPresentation(rpcServer, a.commandBus)
 	if err != nil {
 		log.Error("Failed to initialize payment service", zap.Error(err))
 		return err

@@ -1,8 +1,7 @@
 package grpc_layer
 
 import (
-	"event_sourcing_payment/constant"
-	"event_sourcing_payment/domain/usecase"
+	"event_sourcing_payment/application/command"
 
 	"google.golang.org/grpc"
 )
@@ -18,10 +17,9 @@ type grpcPresentation struct {
 
 func NewGrpcPresentation(
 	s *grpc.Server,
-	config *constant.Config,
-	usecase usecase.IUseCase,
+	commandBus *command.CommandBus,
 ) (GrpcPresentation, error) {
-	transactionService := NewTransactionGrpcService(usecase.TransactionUsecase())
+	transactionService := NewTransactionGrpcService(commandBus)
 	return &grpcPresentation{
 		server:                  s,
 		ITransactionGrpcService: transactionService,

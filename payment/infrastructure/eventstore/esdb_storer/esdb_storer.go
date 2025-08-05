@@ -3,7 +3,7 @@ package esdb_storer
 import (
 	"context"
 	"encoding/json"
-	event "event_sourcing_payment/application/event/transaction"
+	"event_sourcing_payment/application/event"
 	"event_sourcing_payment/package/logger"
 	"fmt"
 
@@ -13,7 +13,7 @@ import (
 )
 
 type IEventStorer interface {
-	SaveTransactionEvent(ctx context.Context, txEvent *event.TransactionCreatedEvent) error
+	Append(ctx context.Context, aggregateID string, events []event.DomainEvent) error
 }
 
 type EsdbStorer struct {
@@ -21,39 +21,28 @@ type EsdbStorer struct {
 }
 
 func NewEsdbStorer(ctx context.Context, esdbClient *esdb.Client) IEventStorer {
-	log := logger.FromContext(ctx)
-	log.Info("Initializing ESDB storer")
-
 	return &EsdbStorer{esdbClient: esdbClient}
 }
 
-func (e *EsdbStorer) SaveTransactionEvent(ctx context.Context, txEvent *event.TransactionCreatedEvent) error {
+func (s *EsdbStorer) Append(ctx context.Context, aggregateID string, events []event.DomainEvent) error {
 	log := logger.FromContext(ctx)
 
-	data, err := json.Marshal(txEvent)
-	if err != nil {
-		log.Error("Failed to marshal transaction event", zap.Error(err))
-		return err
+	eventDataList := make([]esdb.EventData, 0, len(events))
+	for _, evt := range events {
+		data, err := json.Marshal(evt)
+		if err != nil {
+			log.Error("Failed to marshal event", zap.Error(err))
+			return err
+		}
+		eventDataList = append(eventDataList, esdb.EventData{
+			ContentType: esdb.ContentTypeJson,
+			EventType:   evt.EventName(),
+			Data:        data,
+			EventID:     uuid.Must(uuid.NewV4()),
+		})
 	}
 
-	metadata, _ := json.Marshal(txEvent)
-
-	eventData := esdb.EventData{
-		ContentType: esdb.ContentTypeJson,
-		EventType:   txEvent.Type.String(),
-		Data:        data,
-		Metadata:    metadata,
-		EventID:     uuid.Must(uuid.NewV4()),
-	}
-
-	// Best practice: use account ID as stream ID
-	streamID := fmt.Sprintf("account-%d", txEvent.AccountID)
-
-	_, err = e.esdbClient.AppendToStream(ctx, streamID, esdb.AppendToStreamOptions{}, eventData)
-	if err != nil {
-		log.Error("Failed to append transaction event to EventStore", zap.Error(err))
-		return err
-	}
-
-	return nil
+	streamID := fmt.Sprintf("account-%s", aggregateID)
+	_, err := s.esdbClient.AppendToStream(ctx, streamID, esdb.AppendToStreamOptions{}, eventDataList...)
+	return err
 }

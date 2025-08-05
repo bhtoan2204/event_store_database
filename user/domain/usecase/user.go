@@ -53,7 +53,7 @@ func (u *userUsecase) CreateUser(ctx context.Context, command *command.CreateUse
 		return ierror.Error(err)
 	}
 
-	user := entities.NewUserEntity(email.Value(), hashPassword)
+	user := entities.NewUserEntity(command.Code, email.Value(), hashPassword)
 	err = u.userRepository.CreateUser(user)
 	if err != nil {
 		return ierror.Error(err)

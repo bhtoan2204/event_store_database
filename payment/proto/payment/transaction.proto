@@ -3,8 +3,10 @@ package payment;
 option go_package = "event_sourcing_payment/proto/payment;payment";
 
 message CreateTransactionRequest {
-    string amount = 1;
-    string type = 2;
+    string account_no = 1;
+    double amount = 2;
+    string type = 3;
+    string reference = 4;
 }
 
 message CreateTransactionResponse {

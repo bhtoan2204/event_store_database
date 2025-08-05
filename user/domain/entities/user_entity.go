@@ -4,14 +4,16 @@ import "time"
 
 type UserEntity struct {
 	id        int64
+	code      string
 	email     string
 	password  string
 	createdAt time.Time
 	updatedAt time.Time
 }
 
-func NewUserEntity(email string, password string) *UserEntity {
+func NewUserEntity(code string, email string, password string) *UserEntity {
 	return &UserEntity{
+		code:     code,
 		email:    email,
 		password: password,
 	}
@@ -19,6 +21,10 @@ func NewUserEntity(email string, password string) *UserEntity {
 
 func (u *UserEntity) ID() int64 {
 	return u.id
+}
+
+func (u *UserEntity) Code() string {
+	return u.code
 }
 
 func (u *UserEntity) Email() string {

@@ -1,4 +1,4 @@
-package command
+package user_command
 
 import (
 	"context"
