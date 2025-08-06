@@ -75,16 +75,37 @@ func (u *TransactionUsecase) ListTransaction(ctx context.Context, req *dto.ListT
 			TransactionCode: transaction.TransactionCode,
 			AccountNo:       transaction.AccountNo,
 			Type:            transaction.Type.String(),
-			Amount:          float64(transaction.Amount),
+			Amount:          transaction.Amount,
 			Reference:       transaction.Reference,
+			CreatedAt:       transaction.CreatedAt.Format("2006-01-02T15:04:05Z"),
+			UpdatedAt:       transaction.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 		})
 	}
 
+	totalCount := len(responseDtos)
+	page := req.Page
+	pageSize := req.PageSize
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10 // default page size
+	}
+	start := (page - 1) * pageSize
+	end := start + pageSize
+	if start > totalCount {
+		start = totalCount
+	}
+	if end > totalCount {
+		end = totalCount
+	}
+	pagedRows := responseDtos[start:end]
+	totalPages := (totalCount + pageSize - 1) / pageSize
 	return &dto.ListTransactionResponseDto{
-		Rows:       responseDtos,
-		TotalCount: len(responseDtos),
-		TotalPages: 1,
-		Page:       1,
-		PageSize:   1,
+		Rows:       pagedRows,
+		TotalCount: totalCount,
+		TotalPages: totalPages,
+		Page:       page,
+		PageSize:   pageSize,
 	}, nil
 }

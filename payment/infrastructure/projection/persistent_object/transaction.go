@@ -8,6 +8,6 @@ type Transaction struct {
 	TransactionCode string `gorm:"unique"`
 	AccountNo       string
 	Type            constant.TransactionType // Deposit, Withdraw, Transfer
-	Amount          int64
+	Amount          float64
 	Reference       string // optional
 }

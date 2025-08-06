@@ -22,5 +22,9 @@ func NewTransactionRepository(ctx context.Context, db *gorm.DB) ITransactionRepo
 }
 
 func (r *TransactionRepository) GetTransactionByAccountNo(ctx context.Context, accountNo string) (*[]persistent_object.Transaction, error) {
-	return nil, nil
+	var transactions []persistent_object.Transaction
+	if err := r.db.WithContext(ctx).Where("account_no = ?", accountNo).Order("created_at desc").Find(&transactions).Error; err != nil {
+		return nil, err
+	}
+	return &transactions, nil
 }

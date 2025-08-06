@@ -37,9 +37,6 @@ func (r *ListTransactionRequestDto) Validate() error {
 	if err := validate.Struct(r); err != nil {
 		return err
 	}
-	if r.Page < 1 || r.PageSize < 1 {
-		return errors.New("page and page size must be greater than 0")
-	}
 	return nil
 }
 
