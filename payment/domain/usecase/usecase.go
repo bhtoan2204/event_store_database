@@ -1,6 +1,9 @@
 package usecase
 
-import "event_sourcing_payment/infrastructure/eventstore/esdb_storer"
+import (
+	"event_sourcing_payment/infrastructure/eventstore/esdb_storer"
+	"event_sourcing_payment/infrastructure/projection/repository"
+)
 
 type IUseCase interface {
 	AccountUsecase() IAccountUsecase
@@ -12,10 +15,10 @@ type UseCase struct {
 	transactionUsecase ITransactionUsecase
 }
 
-func NewUseCase(esdbStorer esdb_storer.IEventStorer) IUseCase {
+func NewUseCase(esdbStorer esdb_storer.IEventStorer, repoFactory repository.IFactoryRepository) IUseCase {
 	return &UseCase{
 		accountUsecase:     NewAccountUsecase(),
-		transactionUsecase: NewTransactionUsecase(esdbStorer),
+		transactionUsecase: NewTransactionUsecase(esdbStorer, repoFactory),
 	}
 }
 
