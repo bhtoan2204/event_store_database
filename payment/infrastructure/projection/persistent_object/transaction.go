@@ -4,9 +4,9 @@ import "event_sourcing_payment/constant"
 
 type Transaction struct {
 	Base
-	ID              uint   `gorm:"primaryKey"`
+	ID              int64  `gorm:"primaryKey"`
 	TransactionCode string `gorm:"unique"`
-	AccountID       uint
+	AccountNo       string
 	Type            constant.TransactionType // Deposit, Withdraw, Transfer
 	Amount          int64
 	Reference       string // optional

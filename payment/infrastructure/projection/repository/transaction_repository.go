@@ -8,7 +8,7 @@ import (
 )
 
 type ITransactionRepository interface {
-	GetTransactionByAccountID(ctx context.Context, accountID string) (*[]persistent_object.Transaction, error)
+	GetTransactionByAccountNo(ctx context.Context, accountNo string) (*[]persistent_object.Transaction, error)
 }
 
 type TransactionRepository struct {
@@ -21,6 +21,6 @@ func NewTransactionRepository(ctx context.Context, db *gorm.DB) ITransactionRepo
 	}
 }
 
-func (r *TransactionRepository) GetTransactionByAccountID(ctx context.Context, accountID string) (*[]persistent_object.Transaction, error) {
+func (r *TransactionRepository) GetTransactionByAccountNo(ctx context.Context, accountNo string) (*[]persistent_object.Transaction, error) {
 	return nil, nil
 }

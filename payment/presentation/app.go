@@ -79,7 +79,7 @@ func NewApp(ctx context.Context, cfg *constant.Config) (App, error) {
 
 	repo := repository.NewFactoryRepository(ctx, projectionConn)
 	esdbStorer := esdb_storer.NewEsdbStorer(ctx, eventStoreConn.GetClient())
-	useCase := usecase.NewUseCase(esdbStorer)
+	useCase := usecase.NewUseCase(esdbStorer, repo)
 	eventBus := event.NewEventBus()
 	commandBus := command.NewCommandBus(esdbStorer, useCase)
 	queryBus := query.NewQueryBus(repo, useCase)
